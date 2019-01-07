@@ -42,12 +42,12 @@ def L_i(x, y, W):
     correct_class_score = scores[y]
     D = W.shape[0] # number of classes, i.e. 10
     loss_i = 0.0
-    for j in xrange(D): # iterate over all the wrong classes
+    for j in range(D): # iterate over all the wrong classes
         if j==y:
             # skip for the true class to only loop over incorrect classes
             continue
-        loss_i += max(0, score[j]-correct_class_score+delta)
-    return loss
+        loss_i += max(0, scores[j]-correct_class_score+delta)
+    return loss_i
 
 
 # Half-Vectorized implementation of loss function
