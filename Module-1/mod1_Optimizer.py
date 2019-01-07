@@ -68,5 +68,120 @@ for i in range(1000):
     Wtry = W + np.random.randn(10, 3073) * step_size
     loss = L(X_train, Y_train)
     if loss < bestloss:
-        
+        W = Wtry
+        bestloss = loss
+    print("iter %d loss is %f" % (i, bestloss))
+
+
+# observation 21.4% accuracy score
+
+# Strategy-3: Following the Gradient
+
+"""
+We use first principle to evaluate the gradient
+We first use numerical method or first principle to evaluate the
+gradient
+
+f'(x) = lim   (f(x+h) - f(x)) / h
+        h -> 0
+
+we use a very small value of h for our calculation
+"""
+
+def eval_numerical_gradient(f, x):
+    """
+    A naive implementation of numerical gradient of f at x
+    - f should be a function that takes a single arguement
+    - x is the point (numpy array) to evaluate the graadient at
+    """
+
+    fx = f(x) # Evaluate function value at original point
+    grad = np.zeros(x.shape)
+    h = .00001
+
+    # iterate over all indexes in x
+    it = np.nditer(x, flags = ['multi_index'], op_flag = ["readwrite"])
+    while not it.finished:
+
+        # evaluate function at x + h
+        ix = it.multi_index
+        old_value = x[ix]
+        x[ix] = old_value+h # increment by x
+        fxh = f(x) # evaluate at x+h
+
+        x[ix] = old_value # restore to previous value (important step)
+
+        # Compute the partial derivative
+        grad[ix] = (fxh - fx) / h # the slope
+        it.iternext() # step to next dimension
+
+    return grad
+
+"""
+We sometimes encounter non-differentiable points while calculating 
+gradient, so to over come that problem we use sub-gradient
+
+otherwise numerically we prefer central difference method
+
+    f'(x) = lim (f(x+h) - f(x-h)) / 2h
+            h -> 0
+"""
+
+
+def CIFAR10_loss_fun(W):
+    return L(X_train, Y_train, W)
+
+W = np.random.rand(10, 3073) * .001 # Random weight
+
+df = eval_numerical_gradient(CIFAR10_loss_fun, W) # get the gradient
+
+loss_original = CIFAR10_loss_fun(W) # the original loss
+
+print("original loss %f" %(loss_original))
+
+for step_size_log in range(-10, 0):
+    step_size = 10**step_size_log
+    W_new = W - step_size*df # new position in the weight space
+    loss_new  = CIFAR10_loss_fun(W_new)
+     print("for step size %f new loss: %f" % (step_size, loss_new))
+
+"""
+In the code above that computes W_new, we are making an update in the negative
+direction of the gradient df since we wish our loss function to decrease, not increase
+Covex optimization
+"""
+
+# Gradient Descent
+
+while True:
+    weights_grad = evaluate_gradient(loss_fun, data, weights)
+    weights += -step_size*weights_grad # performance parameter update
+
+# Vanilla Mini-Batch Gradient Descent 
+
+while True:
+    data_batch = sample_training_data(data, 256) # sample 256 examples
+    weights_grad = eval_gradient(loss_fun, data_batch, weights)
+    weights += -step_size*weights_grad # perform parameter update
+
+
+"""
+Due to memory limitations we sometimes cannot compute gradient or weights for large datasets
+therefore to overcome this problem we use mini-batches for certain sizes.
+
+Generally the size of mini-batches are in the power of 2 as it was observed that 
+computation is much more optimal when we do this.
+
+When the mini-batch size is equal to 1 then it is know as Stochastic Gradient Descent
+sometimes often refered to as on-line Gradient Descent. It is not much computationally 
+optimal as the optimality obtainted from vectorized implementation is lost
+
+"""
+
+
+
+
+
+
+
 
